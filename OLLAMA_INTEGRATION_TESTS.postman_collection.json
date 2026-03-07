@@ -1,0 +1,164 @@
+{
+  "info": {
+    "_postman_id": "elearning-ollama-tests",
+    "name": "E-Learning Platform - Ollama AI Integration",
+    "description": "Test Ollama AI features (Doubt Solver & Quiz Generator)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/v1/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "v1", "health"]
+        },
+        "description": "Check if backend is running"
+      }
+    },
+    {
+      "name": "2. Test Ollama Connection",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:11434/api/tags",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "11434",
+          "path": ["api", "tags"]
+        },
+        "description": "Check if Ollama is running and list available models"
+      }
+    },
+    {
+      "name": "3. Solve Doubt - Biology Question",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_JWT_TOKEN_HERE"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"What is photosynthesis and how does it work?\",\n  \"lessonContent\": \"Photosynthesis is a process used by plants and other organisms to convert light energy, normally from the sun, into chemical energy that can later be released to fuel the plant's activities. This chemical energy is stored in carbohydrate molecules, such as sugars, which are synthesized from carbon dioxide and water. The green parts of plants contain chlorophyll, a pigment that captures light energy.\",\n  \"courseTitle\": \"Biology 101\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/v1/ai/solve-doubt",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "v1", "ai", "solve-doubt"]
+        },
+        "description": "Test Doubt Solver with a biology question"
+      }
+    },
+    {
+      "name": "4. Solve Doubt - Math Question",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_JWT_TOKEN_HERE"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"How do I solve quadratic equations?\",\n  \"lessonContent\": \"A quadratic equation is an equation of the form ax² + bx + c = 0, where a, b, and c are constants. Solutions can be found using the quadratic formula: x = (-b ± √(b² - 4ac)) / 2a. The discriminant (b² - 4ac) determines the nature of roots.\",\n  \"courseTitle\": \"Mathematics 101\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/v1/ai/solve-doubt",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "v1", "ai", "solve-doubt"]
+        },
+        "description": "Test Doubt Solver with a math question"
+      }
+    },
+    {
+      "name": "5. Generate Quiz - Biology Content",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_JWT_TOKEN_HERE"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"lessonContent\": \"Photosynthesis is a process used by plants and other organisms to convert light energy into chemical energy. It occurs in two main stages: the light-dependent reactions in the thylakoid membranes and the light-independent reactions (Calvin cycle) in the stroma. The light reactions produce ATP and NADPH, while the Calvin cycle uses these to produce glucose. Chlorophyll absorbs light energy, and water is split to release oxygen as a byproduct.\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/v1/ai/generate-quiz",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "v1", "ai", "generate-quiz"]
+        },
+        "description": "Generate 5 multiple choice questions from lesson content"
+      }
+    },
+    {
+      "name": "6. Generate Quiz - History Content",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_JWT_TOKEN_HERE"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"lessonContent\": \"The Industrial Revolution was a period of human history marked by the transition from agrarian and handicraft economies to industrial and machine-based manufacturing. It began in Britain in the late 18th century and spread throughout Europe and North America. Key innovations included the steam engine, mechanized textile production, and iron manufacturing. This led to urbanization, social changes, and the rise of the working class. Child labor and poor working conditions were common before labor reforms.\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/v1/ai/generate-quiz",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "v1", "ai", "generate-quiz"]
+        },
+        "description": "Generate quiz questions from history lesson"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "ollama_url",
+      "value": "http://localhost:11434",
+      "type": "string"
+    }
+  ]
+}
