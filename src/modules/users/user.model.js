@@ -24,6 +24,16 @@ const userSchema = new mongoose.Schema(
       default: "student",
     },
 
+    avatar: {
+      type: String,
+      default: "",
+    },
+
+    avatarPublicId: {
+      type: String,
+      default: "",
+    },
+
     refreshToken: {
       type: String,
     },

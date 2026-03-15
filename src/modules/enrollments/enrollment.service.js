@@ -7,9 +7,13 @@ export const enrollCourse = async (courseId, user) => {
   }
 
   const course = await Course.findById(courseId);
-
   if (!course || !course.isPublished) {
     throw new Error("Course not available for enrollment");
+  }
+
+  const existing = await Enrollment.findOne({ student: user._id, course: courseId });
+  if (existing) {
+    throw new Error("Already enrolled in this course");
   }
 
   const enrollment = await Enrollment.create({
@@ -21,8 +25,10 @@ export const enrollCourse = async (courseId, user) => {
 };
 
 export const getMyEnrollments = async (user) => {
-  return Enrollment.find({ student: user._id })
+  const enrollments = await Enrollment.find({ student: user._id })
     .populate("course", "title description");
+  // filter out enrollments whose course was deleted (populate returns null)
+  return enrollments.filter(e => e.course != null);
 };
 export const updateProgress = async (enrollmentId, progress, user) => {
   const enrollment = await Enrollment.findById(enrollmentId);

@@ -7,9 +7,19 @@ import v1Routes from "./routes/v1.routes.js";
 
 const app = express();
 
-app.use(express.json());
-app.use(cors());
-app.use(helmet());
+app.use((req, res, next) => {
+  if (req.headers['content-type']?.startsWith('multipart/form-data')) return next();
+  express.json({ limit: "500mb" })(req, res, next);
+});
+app.use((req, res, next) => {
+  if (req.headers['content-type']?.startsWith('multipart/form-data')) return next();
+  express.urlencoded({ extended: true, limit: "500mb" })(req, res, next);
+});
+app.use(cors({
+  origin: ["http://localhost:5173", "http://localhost:3000"],
+  credentials: true,
+}));
+app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(morgan("dev"));
 
 // IMPORTANT

@@ -9,8 +9,8 @@ import { authenticate } from "../../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/:courseId", authenticate, enroll);
 router.get("/me", authenticate, myEnrollments);
+router.post("/:courseId", authenticate, enroll);
 router.patch("/:id/progress", authenticate, update);
 
 export default router;

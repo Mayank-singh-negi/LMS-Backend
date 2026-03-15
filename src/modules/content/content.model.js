@@ -14,6 +14,15 @@ const contentSchema = new mongoose.Schema(
     },
     url: String,
     publicId: String,
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+    rejectionReason: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

@@ -140,6 +140,11 @@ export const deleteCourse = async (id, user) => {
     throw new Error("Not authorized");
   }
 
+  // cascade delete enrollments and content
+  const Enrollment = (await import("../enrollments/enrollment.model.js")).default;
+  const Content = (await import("../content/content.model.js")).default;
+  await Enrollment.deleteMany({ course: id });
+  await Content.deleteMany({ course: id });
   await Course.findByIdAndDelete(id);
 
   cache.flushAll();
