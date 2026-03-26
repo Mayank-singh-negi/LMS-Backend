@@ -28,6 +28,7 @@ app.use(cors({
   },
   credentials: true,
 }));
+app.options('*', cors());
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(morgan("dev"));
 
