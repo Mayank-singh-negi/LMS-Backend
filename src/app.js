@@ -19,10 +19,9 @@ app.use(cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true);
     const allowed = [
-      // local development
       /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/,
-      // production — Vercel deployments
       /^https:\/\/.*\.vercel\.app$/,
+      /^https:\/\/.*\.onrender\.com$/,
     ];
     if (allowed.some(r => r.test(origin))) return callback(null, true);
     callback(new Error('Not allowed by CORS'));
