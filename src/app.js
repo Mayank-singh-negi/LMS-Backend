@@ -16,7 +16,14 @@ app.use((req, res, next) => {
   express.urlencoded({ extended: true, limit: "500mb" })(req, res, next);
 });
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:3000"],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    // Allow any local network IP (192.168.x.x, 10.x.x.x) and localhost
+    const allowed = /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/;
+    if (allowed.test(origin)) return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 }));
 app.use(helmet({ crossOriginResourcePolicy: false }));
