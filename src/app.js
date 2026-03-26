@@ -17,11 +17,14 @@ app.use((req, res, next) => {
 });
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
-    // Allow any local network IP (192.168.x.x, 10.x.x.x) and localhost
-    const allowed = /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/;
-    if (allowed.test(origin)) return callback(null, true);
+    const allowed = [
+      // local development
+      /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/,
+      // production — Vercel deployments
+      /^https:\/\/.*\.vercel\.app$/,
+    ];
+    if (allowed.some(r => r.test(origin))) return callback(null, true);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
