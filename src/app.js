@@ -15,7 +15,7 @@ app.use((req, res, next) => {
   if (req.headers['content-type']?.startsWith('multipart/form-data')) return next();
   express.urlencoded({ extended: true, limit: "500mb" })(req, res, next);
 });
-app.use(cors({
+const corsOptions = {
   origin: function(origin, callback) {
     if (!origin) return callback(null, true);
     const allowed = [
@@ -27,9 +27,12 @@ app.use(cors({
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
-}));
-app.options(/(.*)/, cors());
-app.use(helmet({ crossOriginResourcePolicy: false }));
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+app.use(cors(corsOptions));
+app.options(/(.*)/, cors(corsOptions));
+app.use(helmet({ crossOriginResourcePolicy: false, contentSecurityPolicy: false }));
 app.use(morgan("dev"));
 
 // IMPORTANT
