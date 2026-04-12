@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import mongoose from "mongoose";
 import { ChatHistory, GeneratedQuiz, TokenUsage } from "./ai.model.js";
 import winston from "winston";
@@ -57,11 +58,15 @@ const trackTokenUsage = async (userId, type, totalTokens, model, referenceId, re
   }
 };
 
-// Determine AI provider and initialize client if needed
-const aiProvider = process.env.AI_PROVIDER || (process.env.OPENAI_API_KEY ? "openai" : process.env.OLLAMA_BASE_URL ? "ollama" : null);
+// Determine AI provider — Gemini takes priority if key exists
+const aiProvider = process.env.AI_PROVIDER || (process.env.GEMINI_API_KEY ? "gemini" : process.env.OPENAI_API_KEY ? "openai" : process.env.OLLAMA_BASE_URL ? "ollama" : null);
 let aiClient = null;
+let geminiClient = null;
 if (aiProvider === "openai" && process.env.OPENAI_API_KEY) {
   aiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
+if (aiProvider === "gemini" && process.env.GEMINI_API_KEY) {
+  geminiClient = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 }
 const buildQuizGeneratorSystemPrompt = () => {
   return `You are an expert quiz designer for educational content. Your task is to generate high-quality multiple-choice questions.
@@ -104,7 +109,7 @@ export const askDoubt = async ({
   try {
     // Check if AI provider is configured
     if (!aiProvider) {
-      throw new Error("AI is not configured. Please set OPENAI_API_KEY or OLLAMA_BASE_URL environment variable.");
+      throw new Error("AI is not configured. Please set GEMINI_API_KEY, OPENAI_API_KEY, or OLLAMA_BASE_URL environment variable.");
     }
 
     // Validate inputs
@@ -139,7 +144,17 @@ export const askDoubt = async ({
     const model = aiProvider === "ollama" ? process.env.OLLAMA_MODEL || "llama2" : process.env.OPENAI_MODEL || "gpt-4o-mini";
 
     let response;
-    if (aiProvider === "ollama") {
+    if (aiProvider === "gemini") {
+      const geminiModel = geminiClient.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+      const prompt = `${systemPrompt}\n\nUser question: ${sanitizedQuestion}`;
+      const result = await geminiModel.generateContent(prompt);
+      const text = result.response.text();
+      response = {
+        choices: [{ message: { content: text } }],
+        usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+        model: "gemini-2.0-flash-lite",
+      };
+    } else if (aiProvider === "ollama") {
       const axios = await import("axios");
       const base = process.env.OLLAMA_BASE_URL;
       try {
@@ -292,7 +307,7 @@ export const generateQuiz = async ({
   try {
     // Check if AI provider is configured
     if (!aiProvider) {
-      throw new Error("AI is not configured. Please set OPENAI_API_KEY or OLLAMA_BASE_URL environment variable.");
+      throw new Error("AI is not configured. Please set GEMINI_API_KEY, OPENAI_API_KEY, or OLLAMA_BASE_URL environment variable.");
     }
 
     // Validate input
@@ -325,10 +340,22 @@ export const generateQuiz = async ({
       provider: aiProvider,
     });
 
-    // Call AI API (handle Ollama specially)
+    // Call AI API — Gemini, OpenAI, or Ollama
     const model = aiProvider === "ollama" ? process.env.OLLAMA_MODEL || "llama2" : process.env.OPENAI_MODEL || "gpt-4o-mini";
     let response;
-    if (aiProvider === "ollama") {
+
+    if (aiProvider === "gemini") {
+      // Use Gemini Flash (free tier)
+      const geminiModel = geminiClient.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+      const prompt = messages.map(m => m.content).join("\n\n");
+      const result = await geminiModel.generateContent(prompt);
+      const text = result.response.text();
+      response = {
+        choices: [{ message: { content: text } }],
+        usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+        model: "gemini-2.0-flash-lite",
+      };
+    } else if (aiProvider === "ollama") {
       const axios = await import("axios");
       const base = process.env.OLLAMA_BASE_URL;
       try {
@@ -667,3 +694,9 @@ export default {
   markAnswerFeedback,
   getUserAIStats,
 };
+
+
+
+
+
+

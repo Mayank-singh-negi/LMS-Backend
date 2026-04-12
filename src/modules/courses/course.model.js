@@ -33,7 +33,17 @@ const courseSchema = new mongoose.Schema(
       enum: ["draft", "pending", "approved", "rejected"],
       default: "draft",
       index: true,
-    }
+    },
+
+    thumbnail: {
+      type: String,
+      default: "",
+    },
+
+    thumbnailPublicId: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

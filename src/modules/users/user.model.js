@@ -15,7 +15,8 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
 
     role: {
@@ -36,6 +37,62 @@ const userSchema = new mongoose.Schema(
 
     refreshToken: {
       type: String,
+    },
+
+    provider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
+
+    googleId: {
+      type: String,
+      default: null,
+    },
+
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    otp: {
+      type: String,
+      default: null,
+    },
+
+    otpExpiry: {
+      type: Date,
+      default: null,
+    },
+
+    otpResendCount: {
+      type: Number,
+      default: 0,
+    },
+
+    otpResendResetAt: {
+      type: Date,
+      default: null,
+    },
+
+    passwordResetToken: {
+      type: String,
+      default: null,
+    },
+
+    passwordResetExpiry: {
+      type: Date,
+      default: null,
+    },
+
+    streak: {
+      type: Number,
+      default: 0,
+    },
+
+    lastLoginDate: {
+      type: String, // stored as "YYYY-MM-DD" for easy day comparison
+      default: null,
     },
   },
   { timestamps: true }

@@ -11,6 +11,8 @@ import {
   getUserStatsController,
   getQuizByIdController,
   deleteQuizController,
+  getCourseQuizzesController,
+  attemptQuizController,
 } from "./ai.controller.js";
 import { aiRateLimiter, aiStrictRateLimiter } from "../../middlewares/ai-rate-limit.middleware.js";
 import {
@@ -97,6 +99,12 @@ router.delete(
   authorize("teacher", "admin"),
   deleteQuizController
 );
+
+// GET - Get all published quizzes for a course (students)
+router.get("/quizzes/course/:courseId", authenticate, getCourseQuizzesController);
+
+// POST - Student attempts a quiz
+router.post("/quiz/:quizId/attempt", authenticate, authorize("student"), attemptQuizController);
 
 /**
  * STATISTICS & ANALYTICS ROUTES

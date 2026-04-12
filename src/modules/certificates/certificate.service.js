@@ -41,3 +41,9 @@ export const verifyCertificate = async (certificateId) => {
 
   return cert;
 };
+
+export const getStudentCertificates = async (studentId) => {
+  return await Certificate.find({ student: studentId })
+    .populate("course", "title thumbnail description")
+    .sort({ createdAt: -1 });
+};

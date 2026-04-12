@@ -1,4 +1,4 @@
-import { enrollCourse, getMyEnrollments } from "./enrollment.service.js";
+import { enrollCourse, getMyEnrollments, updateProgress, getCourseStudents } from "./enrollment.service.js";
 
 export const enroll = async (req, res, next) => {
   try {
@@ -17,19 +17,21 @@ export const myEnrollments = async (req, res, next) => {
     next(err);
   }
 };
-import { updateProgress } from "./enrollment.service.js";
 
 export const update = async (req, res, next) => {
   try {
     const { progress } = req.body;
-
-    const enrollment = await updateProgress(
-      req.params.id,
-      progress,
-      req.user
-    );
-
+    const enrollment = await updateProgress(req.params.id, progress, req.user);
     res.json(enrollment);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const courseStudents = async (req, res, next) => {
+  try {
+    const students = await getCourseStudents(req.params.courseId, req.user);
+    res.json(students);
   } catch (err) {
     next(err);
   }

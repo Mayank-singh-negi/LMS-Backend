@@ -6,19 +6,15 @@ import rateLimit, { ipKeyGenerator } from "express-rate-limit";
  * Prevents abuse and excessive API costs
  */
 export const aiRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 30, // 30 requests per window
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: {
     success: false,
     message: "Too many requests to AI service, please try again later",
   },
-  standardHeaders: true, // Return rate limit info in RateLimit-* headers
+  standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => {
-    // Skip rate limiting for admin users (optional)
-    return req.user?.role === "admin";
-  },
-  // Use user ID if authenticated, otherwise use IP (with proper IPv6 handling)
+  skip: (req) => true, // no rate limit in development
   keyGenerator: (req) => {
     return req.user?.id || ipKeyGenerator(req);
   },
@@ -31,25 +27,19 @@ export const aiRateLimiter = rateLimit({
  */
 export const aiStrictRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // 10 requests per hour per user
+  max: 100, // increased for development
   message: {
     success: false,
-    message:
-      "Quiz generation limit reached. Maximum 10 quizzes per hour. Please try again later.",
+    message: "Too many requests, please try again later.",
   },
   standardHeaders: true,
   legacyHeaders: false,
-  // Use user ID as key (with proper IPv6 handling for non-authenticated requests)
   keyGenerator: (req) => {
     return req.user?.id || ipKeyGenerator(req);
   },
-  // Skip for admin users
   skip: (req) => {
-    return req.user?.role === "admin";
+    return req.user?.role === "admin" || req.user?.role === "teacher";
   },
 });
 
-export default {
-  aiRateLimiter,
-  aiStrictRateLimiter,
-};
+

@@ -26,10 +26,10 @@ export const enrollCourse = async (courseId, user) => {
 
 export const getMyEnrollments = async (user) => {
   const enrollments = await Enrollment.find({ student: user._id })
-    .populate("course", "title description");
-  // filter out enrollments whose course was deleted (populate returns null)
+    .populate("course", "title description thumbnail averageRating");
   return enrollments.filter(e => e.course != null);
 };
+
 export const updateProgress = async (enrollmentId, progress, user) => {
   const enrollment = await Enrollment.findById(enrollmentId);
 
@@ -45,4 +45,24 @@ export const updateProgress = async (enrollmentId, progress, user) => {
   await enrollment.save();
 
   return enrollment;
+};
+
+export const getCourseStudents = async (courseId, user) => {
+  // Verify the course belongs to this teacher (or admin)
+  const course = await Course.findById(courseId);
+  if (!course) throw new Error("Course not found");
+  if (user.role !== "admin" && course.teacher.toString() !== user._id.toString()) {
+    throw new Error("Not authorized");
+  }
+
+  const enrollments = await Enrollment.find({ course: courseId })
+    .populate("student", "name email avatar createdAt")
+    .sort({ createdAt: -1 });
+
+  return enrollments.map(e => ({
+    _id: e._id,
+    student: e.student,
+    progress: e.progress,
+    enrolledAt: e.createdAt,
+  }));
 };

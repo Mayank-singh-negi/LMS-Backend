@@ -42,4 +42,12 @@ app.get("/", (req, res) => {
   res.json({ message: "E-Learning Backend API Running 🚀" });
 });
 
+// Global error handler — always returns JSON
+app.use((err, req, res, _next) => {
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || "Internal server error";
+  console.error(`[ERROR] ${req.method} ${req.path} →`, message);
+  res.status(status).json({ message });
+});
+
 export default app;

@@ -7,7 +7,7 @@ import {
   markAnswerFeedback,
   getUserAIStats,
 } from "./ai.service.js";
-import { ChatHistory, GeneratedQuiz } from "./ai.model.js";
+import { GeneratedQuiz } from "./ai.model.js";
 import winston from "winston";
 
 // Logger configuration
@@ -132,10 +132,10 @@ export const generateQuizController = async (req, res) => {
       });
     }
 
-    if (lessonContent.length < 100) {
+    if (lessonContent.length < 10) {
       return res.status(400).json({
         success: false,
-        message: "Lesson content must be at least 100 characters",
+        message: "Lesson content must be at least 10 characters",
       });
     }
 
@@ -413,6 +413,52 @@ export const getUserStatsController = async (req, res) => {
 };
 
 /**
+ * GET /api/v1/ai/quizzes/course/:courseId
+ * Get all published quizzes for a course (students)
+ */
+export const getCourseQuizzesController = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const quizzes = await GeneratedQuiz.find({ courseId, isPublished: true })
+      .select("_id courseId questions createdAt")
+      .lean();
+    return res.status(200).json({ success: true, data: quizzes });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * POST /api/v1/ai/quiz/:quizId/attempt
+ * Student attempts a quiz — submit answers, get score
+ */
+export const attemptQuizController = async (req, res) => {
+  try {
+    const { quizId } = req.params;
+    const { answers } = req.body; // { [questionIndex]: selectedOption }
+
+    const quiz = await GeneratedQuiz.findById(quizId);
+    if (!quiz) return res.status(404).json({ success: false, message: "Quiz not found" });
+    if (!quiz.isPublished) return res.status(403).json({ success: false, message: "Quiz is not published yet" });
+
+    let score = 0;
+    const breakdown = quiz.questions.map((q, i) => {
+      const selected = answers[i] ?? null;
+      const correct = selected === q.correctAnswer;
+      if (correct) score++;
+      return { question: q.question, selected, correctAnswer: q.correctAnswer, correct, explanation: q.explanation };
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: { score, total: quiz.questions.length, percentage: Math.round((score / quiz.questions.length) * 100), breakdown },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
  * GET /api/v1/ai/quiz/:quizId
  * Get a specific generated quiz by ID
  */
@@ -504,14 +550,4 @@ export const deleteQuizController = async (req, res) => {
   }
 };
 
-export default {
-  askDoubtController,
-  generateQuizController,
-  getChatHistoryController,
-  getLessonQuizzesController,
-  publishQuizController,
-  markFeedbackController,
-  getUserStatsController,
-  getQuizByIdController,
-  deleteQuizController,
-};
+

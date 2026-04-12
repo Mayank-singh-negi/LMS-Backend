@@ -9,29 +9,20 @@ import certificateRoutes from "../modules/certificates/certificate.routes.js";
 import contentRoutes from "../modules/content/content.routes.js";
 import reviewRoutes from "../modules/reviews/review.routes.js";
 import aiRoutes from "../modules/ai/ai.routes.js";
+import moduleRoutes from "../modules/modules/module.routes.js";
 
 const router = express.Router();
 
-// Auth routes
 router.use("/auth", authRoutes);
-
-// Course and learning content routes
 router.use("/courses", courseRoutes);
 router.use("/content", contentRoutes);
+router.use("/modules", moduleRoutes);
 router.use("/enrollments", enrollmentRoutes);
-
-// Review and testing routes
 router.use("/reviews", reviewRoutes);
 router.use("/mocktests", mockTestRoutes);
 router.use("/testresults", testResultRoutes);
-
-// Certificate routes
 router.use("/certificates", certificateRoutes);
-
-// Admin routes
 router.use("/admin", adminRoutes);
-
-// AI features routes (doubt solver, quiz generator)
 router.use("/ai", aiRoutes);
 
 export default router;

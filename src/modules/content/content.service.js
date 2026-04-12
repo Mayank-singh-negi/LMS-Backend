@@ -2,7 +2,7 @@ import cloudinary from "../../config/cloudinary.js";
 import Content from "./content.model.js";
 import Course from "../courses/course.model.js";
 
-export const uploadContent = async (file, courseId, title, user) => {
+export const uploadContent = async (file, courseId, title, user, moduleId) => {
   const course = await Course.findById(courseId);
   if (!course) throw new Error("Course not found");
   if (course.teacher.toString() !== user._id.toString() && user.role !== "admin") {
@@ -14,12 +14,15 @@ export const uploadContent = async (file, courseId, title, user) => {
       { resource_type: "auto" },
       async (error, result) => {
         if (error) return reject(error);
+        const count = await Content.countDocuments({ course: courseId });
         const content = await Content.create({
           course: courseId,
+          module: moduleId || null,
           title,
           type: result.resource_type === "video" ? "video" : "pdf",
           url: result.secure_url,
           publicId: result.public_id,
+          order: count,
         });
         resolve(content);
       }
@@ -28,20 +31,25 @@ export const uploadContent = async (file, courseId, title, user) => {
   });
 };
 
-// Save content record after direct Cloudinary upload from browser
-export const saveContentRecord = async ({ courseId, title, url, publicId, resourceType }, user) => {
+export const saveContentRecord = async ({ courseId, title, url, publicId, resourceType, moduleId, duration }, user) => {
   const course = await Course.findById(courseId);
   if (!course) throw new Error("Course not found");
   if (course.teacher.toString() !== user._id.toString() && user.role !== "admin") {
     throw new Error("Not authorized");
   }
 
+  const count = await Content.countDocuments({ course: courseId });
+  const type = resourceType === "video" ? "video" : resourceType === "raw" ? "pdf" : "pdf";
+
   const content = await Content.create({
     course: courseId,
+    module: moduleId || null,
     title,
-    type: resourceType === "video" ? "video" : "pdf",
+    type,
     url,
     publicId,
+    duration: duration || 0,
+    order: count,
   });
 
   return content;
