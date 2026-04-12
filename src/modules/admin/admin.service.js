@@ -139,7 +139,7 @@ import crypto from "crypto";
 import { sendAdminOTPEmail } from "../../config/email.js";
 
 const OTP_EXPIRY_MS   = 5 * 60 * 1000;   // 5 minutes
-const OTP_RATE_LIMIT  = 5;               // max requests per window
+const OTP_RATE_LIMIT  = 10;              // max requests per window
 const OTP_RATE_WINDOW = 60 * 60 * 1000; // 1 hour window
 
 export const adminSendOtp = async (email) => {
