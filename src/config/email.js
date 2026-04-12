@@ -15,6 +15,7 @@ const transporter = nodemailer.createTransport({
   maxConnections: 5,
   socketTimeout: 10000,
   connectionTimeout: 10000,
+  family: 4, // force IPv4 — Render free tier blocks IPv6
 });
 
 export const sendOTPEmail = async (to, otp) => {
