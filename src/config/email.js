@@ -5,17 +5,18 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 // Create transporter once (reuse connection pool)
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
   pool: true,
   maxConnections: 5,
-  socketTimeout: 10000,
-  connectionTimeout: 10000,
-  family: 4, // force IPv4 — Render free tier blocks IPv6
+  socketTimeout: 15000,
+  connectionTimeout: 15000,
+  family: 4,
+  tls: { rejectUnauthorized: false },
 });
 
 export const sendOTPEmail = async (to, otp) => {
