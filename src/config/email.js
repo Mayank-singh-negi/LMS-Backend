@@ -9,7 +9,12 @@ async function send(to, subject, html) {
     return;
   }
   const resend = new Resend(process.env.RESEND_API_KEY);
-  await resend.emails.send({ from: FROM, to, subject, html });
+  const result = await resend.emails.send({ from: FROM, to, subject, html });
+  if (result.error) {
+    console.error(`[EMAIL ERROR] ${result.error.name}: ${result.error.message}`);
+    throw new Error(result.error.message);
+  }
+  console.log(`[EMAIL SENT] to=${to} id=${result.data?.id}`);
 }
 
 export const sendOTPEmail = async (to, otp) => {
