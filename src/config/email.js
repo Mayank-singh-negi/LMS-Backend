@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
-const FROM = process.env.EMAIL_FROM || "Learnovora <onboarding@resend.dev>";
+const FROM = "Learnovora <onboarding@resend.dev>";
 
 async function send(to, subject, html) {
   if (!process.env.RESEND_API_KEY) {
