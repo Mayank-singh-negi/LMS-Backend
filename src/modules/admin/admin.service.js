@@ -169,7 +169,8 @@ export const adminSendOtp = async (email) => {
   admin.otpResendCount = (admin.otpResendCount || 0) + 1;
   await admin.save();
 
-  await sendAdminOTPEmail(admin.email, admin.name, otp);
+  // Send email async — don't block the response
+  sendAdminOTPEmail(admin.email, admin.name, otp).catch(err => console.error("[ADMIN OTP EMAIL ERROR]", err.message));
   return { message: "OTP sent to your admin email" };
 };
 

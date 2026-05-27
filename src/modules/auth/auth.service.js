@@ -49,7 +49,8 @@ export const sendOtp = async ({ name, email }) => {
     { upsert: true, new: true }
   );
 
-  await sendOTPEmail(email, otp);
+  // Send email async — don't block the response
+  sendOTPEmail(email, otp).catch(err => console.error("[OTP EMAIL ERROR]", err.message));
   return { message: "OTP sent successfully" };
 };
 
@@ -221,7 +222,8 @@ export const forgotPasswordSendOtp = async ({ email }) => {
   user.otpResendResetAt = (user.otpResendResetAt && user.otpResendResetAt > hourAgo) ? user.otpResendResetAt : now;
   await user.save();
 
-  await sendPasswordResetOTPEmail(email, user.name, otp);
+  // Send email async — don't block the response
+  sendPasswordResetOTPEmail(email, user.name, otp).catch(err => console.error("[RESET OTP EMAIL ERROR]", err.message));
   return { message: "OTP sent to your email" };
 };
 
