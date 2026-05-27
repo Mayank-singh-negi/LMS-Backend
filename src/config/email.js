@@ -1,39 +1,24 @@
-import nodemailer from "nodemailer";
-import dns from "dns";
-
-// Force IPv4 DNS resolution globally — Render free tier blocks IPv6
-dns.setDefaultResultOrder("ipv4first");
+import { Resend } from "resend";
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-function createTransporter() {
-  return nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-    tls: { rejectUnauthorized: false },
-    socketTimeout: 15000,
-    connectionTimeout: 15000,
-  });
-}
-
 async function send(to, subject, html) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  if (!process.env.RESEND_API_KEY) {
     console.log(`\n📧 [DEV] Email to ${to} | Subject: ${subject}\n`);
     return;
   }
-  const transporter = createTransporter();
-  const info = await transporter.sendMail({
-    from: `"Learnovora" <${process.env.SMTP_USER}>`,
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const result = await resend.emails.send({
+    from: "Learnovora <onboarding@resend.dev>",
     to,
     subject,
     html,
   });
-  console.log(`[EMAIL SENT] to=${to} messageId=${info.messageId}`);
+  if (result.error) {
+    console.error(`[EMAIL ERROR] ${result.error.name}: ${result.error.message}`);
+    throw new Error(result.error.message);
+  }
+  console.log(`[EMAIL SENT] to=${to} id=${result.data?.id}`);
 }
 
 export const sendOTPEmail = async (to, otp) => {
@@ -55,7 +40,7 @@ export const sendAdminOTPEmail = async (to, adminName, otp) => {
         <h2 style="color:#ffffff;margin:0;font-size:22px;font-weight:700;">Admin Login OTP</h2>
         <p style="color:rgba(255,255,255,0.6);margin:6px 0 0;font-size:13px;">Learnovora Admin Panel</p>
       </div>
-      <div style="background:#ffffff;padding:32px 40px;border-radius:0 0 16px 16px;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+      <div style="background:#ffffff;padding:32px 40px;border-radius:0 0 16px 16px;">
         <p style="color:#1e293b;font-size:15px;margin:0 0 8px;">Hi <strong>${adminName || "Admin"}</strong>,</p>
         <p style="color:#64748b;font-size:14px;line-height:1.6;margin:0 0 24px;">Use the code below to sign in. Expires in <strong>5 minutes</strong>.</p>
         <div style="background:#0f172a;border-radius:12px;padding:20px;text-align:center;margin:0 0 24px;">
