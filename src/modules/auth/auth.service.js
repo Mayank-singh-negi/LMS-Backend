@@ -92,7 +92,7 @@ export const registerUser = async ({ name, email, password, role }) => {
 };
 
 // GOOGLE AUTH
-export const googleAuth = async ({ credential }) => {
+export const googleAuth = async ({ credential, role }) => {
   if (!credential) throw new Error("Google credential is required");
 
   const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
@@ -105,7 +105,14 @@ export const googleAuth = async ({ credential }) => {
 
   let user = await User.findOne({ email });
   if (!user) {
-    user = await User.create({ name, email, password: null, avatar: picture || "", isVerified: true, provider: "google", googleId });
+    user = await User.create({
+      name, email, password: null,
+      avatar: picture || "",
+      isVerified: true,
+      provider: "google",
+      googleId,
+      role: role || "student",
+    });
   } else if (!user.googleId) {
     user.googleId = googleId;
     user.provider = "google";
