@@ -127,6 +127,8 @@ export const loginUser = async ({ email, password }) => {
   const user = await User.findOne({ email });
   if (!user) throw new Error("Invalid credentials");
 
+  if (!user.password) throw new Error("This account uses Google sign-in. Please use 'Continue with Google' to sign in.");
+
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Invalid credentials");
 
