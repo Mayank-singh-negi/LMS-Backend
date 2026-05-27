@@ -29,3 +29,16 @@ const startServer = async () => {
 };
 
 startServer();
+
+// Keep Render free tier alive — ping every 14 minutes to prevent cold starts
+if (process.env.RENDER_EXTERNAL_URL) {
+  const PING_URL = process.env.RENDER_EXTERNAL_URL;
+  setInterval(async () => {
+    try {
+      await fetch(PING_URL);
+      console.log(`[keep-alive] pinged ${PING_URL}`);
+    } catch (e) {
+      console.warn("[keep-alive] ping failed:", e.message);
+    }
+  }, 14 * 60 * 1000); // every 14 minutes
+}
