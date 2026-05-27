@@ -12,7 +12,10 @@ function createTransporter() {
       pass: process.env.SMTP_PASS,
     },
     family: 4,
+    dnsTimeout: 5000,
     tls: { rejectUnauthorized: false },
+    socketTimeout: 15000,
+    connectionTimeout: 15000,
   });
 }
 
