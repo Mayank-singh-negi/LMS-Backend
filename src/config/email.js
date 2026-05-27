@@ -1,24 +1,32 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
+function createTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
+    port: parseInt(process.env.SMTP_PORT || "587"),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+}
+
 async function send(to, subject, html) {
-  if (!process.env.RESEND_API_KEY) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
     console.log(`\n📧 [DEV] Email to ${to} | Subject: ${subject}\n`);
     return;
   }
-  const resend = new Resend(process.env.RESEND_API_KEY);
-  const result = await resend.emails.send({
-    from: "Learnovora <onboarding@resend.dev>",
+  const transporter = createTransporter();
+  const info = await transporter.sendMail({
+    from: `"Learnovora" <${process.env.EMAIL_FROM || process.env.SMTP_USER}>`,
     to,
     subject,
     html,
   });
-  if (result.error) {
-    console.error(`[EMAIL ERROR] ${result.error.name}: ${result.error.message}`);
-    throw new Error(result.error.message);
-  }
-  console.log(`[EMAIL SENT] to=${to} id=${result.data?.id}`);
+  console.log(`[EMAIL SENT] to=${to} messageId=${info.messageId}`);
 }
 
 export const sendOTPEmail = async (to, otp) => {
