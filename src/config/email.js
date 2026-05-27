@@ -1,4 +1,8 @@
 import nodemailer from "nodemailer";
+import dns from "dns";
+
+// Force IPv4 DNS resolution globally — Render free tier blocks IPv6
+dns.setDefaultResultOrder("ipv4first");
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
@@ -11,8 +15,6 @@ function createTransporter() {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
-    family: 4,
-    dnsTimeout: 5000,
     tls: { rejectUnauthorized: false },
     socketTimeout: 15000,
     connectionTimeout: 15000,
