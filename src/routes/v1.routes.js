@@ -10,21 +10,8 @@ import contentRoutes from "../modules/content/content.routes.js";
 import reviewRoutes from "../modules/reviews/review.routes.js";
 import aiRoutes from "../modules/ai/ai.routes.js";
 import moduleRoutes from "../modules/modules/module.routes.js";
-import nodemailer from "nodemailer";
 
 const router = express.Router();
-
-// Temporary email test endpoint — remove after confirming email works
-router.get("/test-email", async (req, res) => {
-  const to = req.query.to || process.env.EMAIL_FROM;
-  try {
-    const { sendOTPEmail } = await import("../config/email.js");
-    await sendOTPEmail(to, "123456");
-    res.json({ success: true, message: `Email sent to ${to}`, brevo_key_set: !!process.env.BREVO_API_KEY });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message, brevo_key_set: !!process.env.BREVO_API_KEY });
-  }
-});
 
 router.use("/auth", authRoutes);
 router.use("/courses", courseRoutes);
