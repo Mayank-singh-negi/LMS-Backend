@@ -25,7 +25,7 @@ export const sendOtp = async ({ name, email }) => {
   const current = await User.findOne({ email, isVerified: false });
   if (current) {
     const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    if (current.otpResendResetAt && current.otpResendResetAt > hourAgo && current.otpResendCount >= 5) {
+    if (current.otpResendResetAt && current.otpResendResetAt > hourAgo && current.otpResendCount >= 10) {
       throw new Error("Too many OTP requests. Please try again later.");
     }
   }
