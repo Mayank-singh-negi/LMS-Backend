@@ -1,32 +1,50 @@
 import nodemailer from "nodemailer";
+import https from "https";
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-function createTransporter() {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
-    port: parseInt(process.env.SMTP_PORT || "587"),
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
+// Use Brevo HTTP API — works on Render (no SMTP port blocking)
+async function sendViaBrevoAPI(to, subject, html) {
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify({
+      sender: { name: "Learnovora", email: process.env.EMAIL_FROM || "negimayank243@gmail.com" },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+    });
+    const req = https.request({
+      hostname: "api.brevo.com",
+      path: "/v3/smtp/email",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Length": Buffer.byteLength(body),
+      },
+    }, (res) => {
+      let data = "";
+      res.on("data", chunk => data += chunk);
+      res.on("end", () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          console.log(`[EMAIL SENT] to=${to} status=${res.statusCode}`);
+          resolve(data);
+        } else {
+          reject(new Error(`Brevo API error ${res.statusCode}: ${data}`));
+        }
+      });
+    });
+    req.on("error", reject);
+    req.write(body);
+    req.end();
   });
 }
 
 async function send(to, subject, html) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  if (!process.env.BREVO_API_KEY) {
     console.log(`\n📧 [DEV] Email to ${to} | Subject: ${subject}\n`);
     return;
   }
-  const transporter = createTransporter();
-  const info = await transporter.sendMail({
-    from: `"Learnovora" <${process.env.EMAIL_FROM || process.env.SMTP_USER}>`,
-    to,
-    subject,
-    html,
-  });
-  console.log(`[EMAIL SENT] to=${to} messageId=${info.messageId}`);
+  await sendViaBrevoAPI(to, subject, html);
 }
 
 export const sendOTPEmail = async (to, otp) => {
