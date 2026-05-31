@@ -10,6 +10,8 @@ import contentRoutes from "../modules/content/content.routes.js";
 import reviewRoutes from "../modules/reviews/review.routes.js";
 import aiRoutes from "../modules/ai/ai.routes.js";
 import moduleRoutes from "../modules/modules/module.routes.js";
+import progressRoutes from "../modules/progress/progress.routes.js";
+import noteRoutes from "../modules/notes/note.routes.js";
 
 const router = express.Router();
 
@@ -24,5 +26,7 @@ router.use("/testresults", testResultRoutes);
 router.use("/certificates", certificateRoutes);
 router.use("/admin", adminRoutes);
 router.use("/ai", aiRoutes);
+router.use("/progress", progressRoutes);
+router.use("/notes", noteRoutes);
 
 export default router;
