@@ -9,17 +9,31 @@ export const uploadContent = async (file, courseId, title, user, moduleId) => {
     throw new Error("Not authorized");
   }
 
+  // Detect if file is a PDF/PPT to use raw resource type
+  const isPdf = file.mimetype === "application/pdf" ||
+    file.originalname?.toLowerCase().endsWith(".pdf") ||
+    file.originalname?.toLowerCase().endsWith(".ppt") ||
+    file.originalname?.toLowerCase().endsWith(".pptx");
+
+  const resourceType = isPdf ? "raw" : "auto";
+
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { resource_type: "auto" },
+      { resource_type: resourceType },
       async (error, result) => {
         if (error) return reject(error);
+
+        // Determine content type
+        let contentType = "pdf";
+        if (result.resource_type === "video") contentType = "video";
+        else if (result.resource_type === "raw") contentType = "pdf";
+
         const count = await Content.countDocuments({ course: courseId });
         const content = await Content.create({
           course: courseId,
           module: moduleId || null,
           title,
-          type: result.resource_type === "video" ? "video" : "pdf",
+          type: contentType,
           url: result.secure_url,
           publicId: result.public_id,
           order: count,
